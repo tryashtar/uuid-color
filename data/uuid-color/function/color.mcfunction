@@ -22,82 +22,62 @@ execute if score blue uuid-color < min uuid-color run scoreboard players operati
 
 scoreboard players operation range uuid-color = max uuid-color
 scoreboard players operation range uuid-color -= min uuid-color
-scoreboard players operation bright uuid-color = range uuid-color
-scoreboard players operation bright uuid-color *= #256 uuid-color
-scoreboard players operation bright uuid-color /= max uuid-color
+scoreboard players operation saturation uuid-color = range uuid-color
+scoreboard players operation saturation uuid-color *= #256 uuid-color
+scoreboard players operation saturation uuid-color /= max uuid-color
 
-execute if score bright uuid-color matches 0 run return run scoreboard players set color uuid-color 15132390
+execute if score saturation uuid-color matches 0 run return run scoreboard players set color uuid-color 15132390
 
-scoreboard players operation red_range uuid-color = max uuid-color
-scoreboard players operation red_range uuid-color -= red uuid-color
-scoreboard players operation red_range uuid-color *= #256 uuid-color
-scoreboard players operation red_range uuid-color /= range uuid-color
-scoreboard players operation green_range uuid-color = max uuid-color
-scoreboard players operation green_range uuid-color -= green uuid-color
-scoreboard players operation green_range uuid-color *= #256 uuid-color
-scoreboard players operation green_range uuid-color /= range uuid-color
-scoreboard players operation blue_range uuid-color = max uuid-color
-scoreboard players operation blue_range uuid-color -= blue uuid-color
-scoreboard players operation blue_range uuid-color *= #256 uuid-color
-scoreboard players operation blue_range uuid-color /= range uuid-color
-
-execute if score red uuid-color = max uuid-color run scoreboard players operation hue uuid-color = blue_range uuid-color
-execute if score red uuid-color = max uuid-color run scoreboard players operation hue uuid-color -= green_range uuid-color
-execute if score green uuid-color = max uuid-color run scoreboard players operation hue uuid-color = red_range uuid-color
-execute if score green uuid-color = max uuid-color run scoreboard players operation hue uuid-color -= blue_range uuid-color
+execute if score red uuid-color = max uuid-color run scoreboard players operation hue uuid-color = green uuid-color
+execute if score red uuid-color = max uuid-color run scoreboard players operation hue uuid-color -= blue uuid-color
+execute if score green uuid-color = max uuid-color run scoreboard players operation hue uuid-color = blue uuid-color
+execute if score green uuid-color = max uuid-color run scoreboard players operation hue uuid-color -= red uuid-color
+execute if score blue uuid-color = max uuid-color run scoreboard players operation hue uuid-color = red uuid-color
+execute if score blue uuid-color = max uuid-color run scoreboard players operation hue uuid-color -= green uuid-color
+scoreboard players operation hue uuid-color *= #256 uuid-color
+scoreboard players operation hue uuid-color /= range uuid-color
+execute if score red uuid-color = max uuid-color if score green uuid-color < blue uuid-color run scoreboard players add hue uuid-color 1536
 execute if score green uuid-color = max uuid-color run scoreboard players add hue uuid-color 512
-execute if score blue uuid-color = max uuid-color run scoreboard players operation hue uuid-color = green_range uuid-color
-execute if score blue uuid-color = max uuid-color run scoreboard players operation hue uuid-color -= red_range uuid-color
 execute if score blue uuid-color = max uuid-color run scoreboard players add hue uuid-color 1024
-scoreboard players operation hue uuid-color /= #6 uuid-color
-execute if score hue uuid-color matches ..-1 run scoreboard players add hue uuid-color 256
-scoreboard players operation hue uuid-color %= #256 uuid-color
+
+scoreboard players set red uuid-color 230
+scoreboard players set green uuid-color 230
+scoreboard players set blue uuid-color 230
 
 scoreboard players operation col1 uuid-color = hue uuid-color
-scoreboard players operation col1 uuid-color *= #6 uuid-color
-scoreboard players operation col2 uuid-color = col1 uuid-color
-scoreboard players operation col2 uuid-color %= #256 uuid-color
+scoreboard players operation col1 uuid-color %= #256 uuid-color
+scoreboard players set col2 uuid-color 256
+scoreboard players operation col2 uuid-color -= saturation uuid-color
+scoreboard players operation col2 uuid-color *= #9 uuid-color
+scoreboard players operation col2 uuid-color /= #10 uuid-color
 scoreboard players set col3 uuid-color 256
-scoreboard players operation col3 uuid-color -= bright uuid-color
+scoreboard players operation temp uuid-color = col1 uuid-color
+scoreboard players operation temp uuid-color *= saturation uuid-color
+scoreboard players operation temp uuid-color /= #256 uuid-color
+scoreboard players operation col3 uuid-color -= temp uuid-color
 scoreboard players operation col3 uuid-color *= #9 uuid-color
 scoreboard players operation col3 uuid-color /= #10 uuid-color
 scoreboard players set col4 uuid-color 256
-scoreboard players operation temp uuid-color = bright uuid-color
-scoreboard players operation temp uuid-color *= col2 uuid-color
+scoreboard players set temp uuid-color 256
+scoreboard players operation temp uuid-color -= col1 uuid-color
+scoreboard players operation temp uuid-color *= saturation uuid-color
 scoreboard players operation temp uuid-color /= #256 uuid-color
 scoreboard players operation col4 uuid-color -= temp uuid-color
-scoreboard players set col5 uuid-color 256
-scoreboard players set temp uuid-color 256
-scoreboard players operation temp uuid-color -= col2 uuid-color
-scoreboard players operation temp uuid-color *= bright uuid-color
-scoreboard players operation temp uuid-color /= #256 uuid-color
-scoreboard players operation col5 uuid-color -= temp uuid-color
-scoreboard players operation col5 uuid-color *= #9 uuid-color
-scoreboard players operation col5 uuid-color /= #10 uuid-color
+scoreboard players operation col4 uuid-color *= #9 uuid-color
+scoreboard players operation col4 uuid-color /= #10 uuid-color
 
-execute if score hue uuid-color matches ..43 run scoreboard players set red uuid-color 230
-execute if score hue uuid-color matches ..43 run scoreboard players operation green uuid-color = col5 uuid-color
-execute if score hue uuid-color matches ..43 run scoreboard players operation blue uuid-color = col3 uuid-color
-
-execute if score hue uuid-color matches 44..85 run scoreboard players operation red uuid-color = col4 uuid-color
-execute if score hue uuid-color matches 44..85 run scoreboard players set green uuid-color 230
-execute if score hue uuid-color matches 44..85 run scoreboard players operation blue uuid-color = col3 uuid-color
-
-execute if score hue uuid-color matches 86..128 run scoreboard players operation red uuid-color = col3 uuid-color
-execute if score hue uuid-color matches 86..128 run scoreboard players set green uuid-color 230
-execute if score hue uuid-color matches 86..128 run scoreboard players operation blue uuid-color = col5 uuid-color
-
-execute if score hue uuid-color matches 129..171 run scoreboard players operation red uuid-color = col3 uuid-color
-execute if score hue uuid-color matches 129..171 run scoreboard players operation green uuid-color = col4 uuid-color
-execute if score hue uuid-color matches 129..171 run scoreboard players set blue uuid-color 230
-
-execute if score hue uuid-color matches 172..213 run scoreboard players operation red uuid-color = col5 uuid-color
-execute if score hue uuid-color matches 172..213 run scoreboard players operation green uuid-color = col3 uuid-color
-execute if score hue uuid-color matches 172..213 run scoreboard players set blue uuid-color 230
-
-execute if score hue uuid-color matches 214.. run scoreboard players set red uuid-color 230
-execute if score hue uuid-color matches 214.. run scoreboard players operation green uuid-color = col3 uuid-color
-execute if score hue uuid-color matches 214.. run scoreboard players operation blue uuid-color = col4 uuid-color
+execute if score hue uuid-color matches ..256 run scoreboard players operation green uuid-color = col4 uuid-color
+execute if score hue uuid-color matches ..256 run scoreboard players operation blue uuid-color = col2 uuid-color
+execute if score hue uuid-color matches 257..512 run scoreboard players operation red uuid-color = col3 uuid-color
+execute if score hue uuid-color matches 257..512 run scoreboard players operation blue uuid-color = col2 uuid-color
+execute if score hue uuid-color matches 513..768 run scoreboard players operation red uuid-color = col2 uuid-color
+execute if score hue uuid-color matches 513..768 run scoreboard players operation blue uuid-color = col4 uuid-color
+execute if score hue uuid-color matches 769..1024 run scoreboard players operation red uuid-color = col2 uuid-color
+execute if score hue uuid-color matches 769..1024 run scoreboard players operation green uuid-color = col3 uuid-color
+execute if score hue uuid-color matches 1025..1280 run scoreboard players operation red uuid-color = col4 uuid-color
+execute if score hue uuid-color matches 1025..1280 run scoreboard players operation green uuid-color = col2 uuid-color
+execute if score hue uuid-color matches 1281.. run scoreboard players operation green uuid-color = col2 uuid-color
+execute if score hue uuid-color matches 1281.. run scoreboard players operation blue uuid-color = col3 uuid-color
 
 scoreboard players operation color uuid-color = red uuid-color
 scoreboard players operation color uuid-color *= #256 uuid-color
