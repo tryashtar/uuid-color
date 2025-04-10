@@ -1,3 +1,10 @@
+# welcome to the pack
+# to use, put a UUID in storage uuid-color:uuid, then run uuid-color:get
+# the int color will be written to the color uuid-color score, with red/green/blue scores also containing each channel
+# demos:
+#   uuid-color:demo/armor -> equip @s with a leather chestplate matching its UUID waypoint color
+#   uuid-color:demo/chat  -> @s prints its UUID waypoint color as a chat message
+#   uuid-color:demo/mobs  -> rename @s to match its waypoint color, and make it start transmitting
 scoreboard objectives add uuid-color dummy
 scoreboard players set #1048576 uuid-color 1048576
 scoreboard players set #65536 uuid-color 65536
