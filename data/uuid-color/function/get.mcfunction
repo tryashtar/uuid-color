@@ -12,14 +12,14 @@ execute store result score uuid4 uuid-color run data get storage uuid-color:main
 # unfortunately, negative numbers don't work with this kind of shifting
 # we need to force them to be positive while preserving the bit pattern
 # so we add 2147483648 to set the most significant bit to 0
-execute if score uuid1 uuid-color matches ..-1 run scoreboard players add uuid1 uuid-color 2147483647
 execute if score uuid1 uuid-color matches ..-1 run scoreboard players add uuid1 uuid-color 1
-execute if score uuid2 uuid-color matches ..-1 run scoreboard players add uuid2 uuid-color 2147483647
+execute if score uuid1 uuid-color matches ..0 run scoreboard players add uuid1 uuid-color 2147483647
 execute if score uuid2 uuid-color matches ..-1 run scoreboard players add uuid2 uuid-color 1
-execute if score uuid3 uuid-color matches ..-1 run scoreboard players add uuid3 uuid-color 2147483647
+execute if score uuid2 uuid-color matches ..0 run scoreboard players add uuid2 uuid-color 2147483647
 execute if score uuid3 uuid-color matches ..-1 run scoreboard players add uuid3 uuid-color 1
-execute if score uuid4 uuid-color matches ..-1 run scoreboard players add uuid4 uuid-color 2147483647
+execute if score uuid3 uuid-color matches ..0 run scoreboard players add uuid3 uuid-color 2147483647
 execute if score uuid4 uuid-color matches ..-1 run scoreboard players add uuid4 uuid-color 1
+execute if score uuid4 uuid-color matches ..0 run scoreboard players add uuid4 uuid-color 2147483647
 
 # the first byte of the final hash is treated as alpha and ultimately discarded
 # therefore, we don't need to bother extracting the first two nibbles of each int

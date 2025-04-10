@@ -6,7 +6,6 @@ scoreboard players set #256 uuid-color 256
 scoreboard players set #16 uuid-color 16
 scoreboard players set #10 uuid-color 10
 scoreboard players set #9 uuid-color 9
-scoreboard players set #6 uuid-color 6
 
 # lookup table for XOR on two nibbles (4-bit values)
 # if we used execute store instead of data modify, we wouldn't need to store any with the output of 0, since the lookup failing will yield that result, but I like data modify better

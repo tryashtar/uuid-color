@@ -4,8 +4,6 @@ $data modify storage uuid-color:main xor2.nibble5 set from storage uuid-color:ma
 $data modify storage uuid-color:main xor2.nibble6 set from storage uuid-color:main xor."$(nibble6)^$(nibble22)"
 $data modify storage uuid-color:main xor2.nibble7 set from storage uuid-color:main xor."$(nibble7)^$(nibble23)"
 $data modify storage uuid-color:main xor2.nibble8 set from storage uuid-color:main xor."$(nibble8)^$(nibble24)"
-$data modify storage uuid-color:main xor2.nibble9 set from storage uuid-color:main xor."$(nibble9)^$(nibble25)"
-$data modify storage uuid-color:main xor2.nibble10 set from storage uuid-color:main xor."$(nibble10)^$(nibble26)"
 $data modify storage uuid-color:main xor2.nibble11 set from storage uuid-color:main xor."$(nibble11)^$(nibble27)"
 $data modify storage uuid-color:main xor2.nibble12 set from storage uuid-color:main xor."$(nibble12)^$(nibble28)"
 $data modify storage uuid-color:main xor2.nibble13 set from storage uuid-color:main xor."$(nibble13)^$(nibble29)"
