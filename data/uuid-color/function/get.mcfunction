@@ -8,7 +8,7 @@ execute store result score uuid4 uuid-color run data get storage uuid-color:main
 # to calculate XOR, we can use a macro lookup table for every combination of inputs
 # so we need to break these 4 large ints into smaller values
 # I chose nibbles, so 8 values between 0 and 15 per int
-# we can use arithmetic divides and modulo to shift and mask the desired uuid
+# we can use arithmetic divides and modulo to shift and mask the desired bits
 # unfortunately, negative numbers don't work with this kind of shifting
 # we need to force them to be positive while preserving the bit pattern
 # so we add 2147483648 to set the most significant bit to 0
@@ -104,6 +104,7 @@ function uuid-color:xor2 with storage uuid-color:main xor2
 # next, we set the color's brightness to 90%
 # this involves converting from RGB to HSV and back
 # the algorithm is standard, with some small adjustments to accommodate integer arithmetic
+# while the hash step is exact, this process does introduce small rounding discrepancies
 scoreboard players operation max uuid-color = red uuid-color
 execute if score green uuid-color > max uuid-color run scoreboard players operation max uuid-color = green uuid-color
 execute if score blue uuid-color > max uuid-color run scoreboard players operation max uuid-color = blue uuid-color
