@@ -1,11 +1,12 @@
 # first, hash the UUID
-# the four integers are simply XOR'd together (XOR is commutative and  associative, so we can do any convenient order)
+# the four integers are simply XOR'd together to get an ARGB integer
 execute store result score uuid1 uuid-color run data get storage uuid-color:main uuid[0]
 execute store result score uuid2 uuid-color run data get storage uuid-color:main uuid[1]
 execute store result score uuid3 uuid-color run data get storage uuid-color:main uuid[2]
 execute store result score uuid4 uuid-color run data get storage uuid-color:main uuid[3]
 
-# we can use arithmetic divides and modulo to shift and mask the desired bits
+# the alpha channel is unused
+# so we can use modulo to mask away the first byte of each int
 # unfortunately, negative numbers don't work with this kind of shifting
 # we need to force them to be positive while preserving the bit pattern
 # so we add 2147483648 to set the most significant bit to 0
@@ -17,10 +18,6 @@ execute if score uuid3 uuid-color matches ..-1 run scoreboard players add uuid3 
 execute if score uuid3 uuid-color matches ..0 run scoreboard players add uuid3 uuid-color 2147483647
 execute if score uuid4 uuid-color matches ..-1 run scoreboard players add uuid4 uuid-color 1
 execute if score uuid4 uuid-color matches ..0 run scoreboard players add uuid4 uuid-color 2147483647
-
-# the first byte of the final hash is treated as alpha and ultimately discarded
-# so we can simply mask away the first byte of each int
-# this also means restoring the most significant bit for negative numbers is also not required
 scoreboard players operation uuid1 uuid-color %= #16777216 uuid-color
 scoreboard players operation uuid2 uuid-color %= #16777216 uuid-color
 scoreboard players operation uuid3 uuid-color %= #16777216 uuid-color
@@ -31,6 +28,9 @@ scoreboard players set red uuid-color 0
 scoreboard players set green uuid-color 0
 scoreboard players set blue uuid-color 0
 
+# simple XOR implementation
+# basically go bit by bit, and write the relevant bit in the output if an odd number of input bits are set
+# uses a lot of commands, but outperforms a previous macro lookup table implementation
 scoreboard players set parity uuid-color 1
 execute if score uuid1 uuid-color matches 8388608.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
 execute if score uuid1 uuid-color matches 8388608.. run scoreboard players remove uuid1 uuid-color 8388608

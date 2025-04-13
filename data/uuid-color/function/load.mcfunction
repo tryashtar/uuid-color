@@ -7,11 +7,7 @@
 #   uuid-color:demo/mobs  -> rename @s to match its waypoint color, and make it start transmitting
 scoreboard objectives add uuid-color dummy
 scoreboard players set #16777216 uuid-color 16777216
-scoreboard players set #1048576 uuid-color 1048576
-scoreboard players set #65536 uuid-color 65536
-scoreboard players set #4096 uuid-color 4096
 scoreboard players set #256 uuid-color 256
-scoreboard players set #16 uuid-color 16
 scoreboard players set #10 uuid-color 10
 scoreboard players set #9 uuid-color 9
 scoreboard players set #-1 uuid-color -1
