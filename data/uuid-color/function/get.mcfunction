@@ -1,13 +1,10 @@
 # first, hash the UUID
-# the formula is (int1 XOR int3) XOR (int2 XOR int4)
+# the four integers are simply XOR'd together (XOR is commutative and  associative, so we can do any convenient order)
 execute store result score uuid1 uuid-color run data get storage uuid-color:main uuid[0]
 execute store result score uuid2 uuid-color run data get storage uuid-color:main uuid[1]
 execute store result score uuid3 uuid-color run data get storage uuid-color:main uuid[2]
 execute store result score uuid4 uuid-color run data get storage uuid-color:main uuid[3]
 
-# to calculate XOR, we can use a macro lookup table for every combination of inputs
-# so we need to break these 4 large ints into smaller values
-# I chose nibbles, so 8 values between 0 and 15 per int
 # we can use arithmetic divides and modulo to shift and mask the desired bits
 # unfortunately, negative numbers don't work with this kind of shifting
 # we need to force them to be positive while preserving the bit pattern
@@ -22,84 +19,256 @@ execute if score uuid4 uuid-color matches ..-1 run scoreboard players add uuid4 
 execute if score uuid4 uuid-color matches ..0 run scoreboard players add uuid4 uuid-color 2147483647
 
 # the first byte of the final hash is treated as alpha and ultimately discarded
-# therefore, we don't need to bother extracting the first two nibbles of each int
+# so we can simply mask away the first byte of each int
 # this also means restoring the most significant bit for negative numbers is also not required
-scoreboard players operation nibble uuid-color = uuid1 uuid-color
-scoreboard players operation nibble uuid-color /= #1048576 uuid-color
-execute store result storage uuid-color:main xor1.nibble3 byte 1 run scoreboard players operation nibble uuid-color %= #16 uuid-color
-scoreboard players operation nibble uuid-color = uuid1 uuid-color
-scoreboard players operation nibble uuid-color /= #65536 uuid-color
-execute store result storage uuid-color:main xor1.nibble4 byte 1 run scoreboard players operation nibble uuid-color %= #16 uuid-color
-scoreboard players operation nibble uuid-color = uuid1 uuid-color
-scoreboard players operation nibble uuid-color /= #4096 uuid-color
-execute store result storage uuid-color:main xor1.nibble5 byte 1 run scoreboard players operation nibble uuid-color %= #16 uuid-color
-scoreboard players operation nibble uuid-color = uuid1 uuid-color
-scoreboard players operation nibble uuid-color /= #256 uuid-color
-execute store result storage uuid-color:main xor1.nibble6 byte 1 run scoreboard players operation nibble uuid-color %= #16 uuid-color
-scoreboard players operation nibble uuid-color = uuid1 uuid-color
-scoreboard players operation nibble uuid-color /= #16 uuid-color
-execute store result storage uuid-color:main xor1.nibble7 byte 1 run scoreboard players operation nibble uuid-color %= #16 uuid-color
-scoreboard players operation nibble uuid-color = uuid1 uuid-color
-execute store result storage uuid-color:main xor1.nibble8 byte 1 run scoreboard players operation nibble uuid-color %= #16 uuid-color
+scoreboard players operation uuid1 uuid-color %= #16777216 uuid-color
+scoreboard players operation uuid2 uuid-color %= #16777216 uuid-color
+scoreboard players operation uuid3 uuid-color %= #16777216 uuid-color
+scoreboard players operation uuid4 uuid-color %= #16777216 uuid-color
 
-scoreboard players operation nibble uuid-color = uuid2 uuid-color
-scoreboard players operation nibble uuid-color /= #1048576 uuid-color
-execute store result storage uuid-color:main xor1.nibble11 byte 1 run scoreboard players operation nibble uuid-color %= #16 uuid-color
-scoreboard players operation nibble uuid-color = uuid2 uuid-color
-scoreboard players operation nibble uuid-color /= #65536 uuid-color
-execute store result storage uuid-color:main xor1.nibble12 byte 1 run scoreboard players operation nibble uuid-color %= #16 uuid-color
-scoreboard players operation nibble uuid-color = uuid2 uuid-color
-scoreboard players operation nibble uuid-color /= #4096 uuid-color
-execute store result storage uuid-color:main xor1.nibble13 byte 1 run scoreboard players operation nibble uuid-color %= #16 uuid-color
-scoreboard players operation nibble uuid-color = uuid2 uuid-color
-scoreboard players operation nibble uuid-color /= #256 uuid-color
-execute store result storage uuid-color:main xor1.nibble14 byte 1 run scoreboard players operation nibble uuid-color %= #16 uuid-color
-scoreboard players operation nibble uuid-color = uuid2 uuid-color
-scoreboard players operation nibble uuid-color /= #16 uuid-color
-execute store result storage uuid-color:main xor1.nibble15 byte 1 run scoreboard players operation nibble uuid-color %= #16 uuid-color
-scoreboard players operation nibble uuid-color = uuid2 uuid-color
-execute store result storage uuid-color:main xor1.nibble16 byte 1 run scoreboard players operation nibble uuid-color %= #16 uuid-color
+# the other three bytes determine the red, green, and blue channels
+scoreboard players set red uuid-color 0
+scoreboard players set green uuid-color 0
+scoreboard players set blue uuid-color 0
 
-scoreboard players operation nibble uuid-color = uuid3 uuid-color
-scoreboard players operation nibble uuid-color /= #1048576 uuid-color
-execute store result storage uuid-color:main xor1.nibble19 byte 1 run scoreboard players operation nibble uuid-color %= #16 uuid-color
-scoreboard players operation nibble uuid-color = uuid3 uuid-color
-scoreboard players operation nibble uuid-color /= #65536 uuid-color
-execute store result storage uuid-color:main xor1.nibble20 byte 1 run scoreboard players operation nibble uuid-color %= #16 uuid-color
-scoreboard players operation nibble uuid-color = uuid3 uuid-color
-scoreboard players operation nibble uuid-color /= #4096 uuid-color
-execute store result storage uuid-color:main xor1.nibble21 byte 1 run scoreboard players operation nibble uuid-color %= #16 uuid-color
-scoreboard players operation nibble uuid-color = uuid3 uuid-color
-scoreboard players operation nibble uuid-color /= #256 uuid-color
-execute store result storage uuid-color:main xor1.nibble22 byte 1 run scoreboard players operation nibble uuid-color %= #16 uuid-color
-scoreboard players operation nibble uuid-color = uuid3 uuid-color
-scoreboard players operation nibble uuid-color /= #16 uuid-color
-execute store result storage uuid-color:main xor1.nibble23 byte 1 run scoreboard players operation nibble uuid-color %= #16 uuid-color
-scoreboard players operation nibble uuid-color = uuid3 uuid-color
-execute store result storage uuid-color:main xor1.nibble24 byte 1 run scoreboard players operation nibble uuid-color %= #16 uuid-color
+scoreboard players set parity uuid-color 1
+execute if score uuid1 uuid-color matches 8388608.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid1 uuid-color matches 8388608.. run scoreboard players remove uuid1 uuid-color 8388608
+execute if score uuid2 uuid-color matches 8388608.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid2 uuid-color matches 8388608.. run scoreboard players remove uuid2 uuid-color 8388608
+execute if score uuid3 uuid-color matches 8388608.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid3 uuid-color matches 8388608.. run scoreboard players remove uuid3 uuid-color 8388608
+execute if score uuid4 uuid-color matches 8388608.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid4 uuid-color matches 8388608.. run scoreboard players remove uuid4 uuid-color 8388608
+execute if score parity uuid-color matches -1 run scoreboard players add red uuid-color 128
+scoreboard players set parity uuid-color 1
+execute if score uuid1 uuid-color matches 4194304.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid1 uuid-color matches 4194304.. run scoreboard players remove uuid1 uuid-color 4194304
+execute if score uuid2 uuid-color matches 4194304.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid2 uuid-color matches 4194304.. run scoreboard players remove uuid2 uuid-color 4194304
+execute if score uuid3 uuid-color matches 4194304.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid3 uuid-color matches 4194304.. run scoreboard players remove uuid3 uuid-color 4194304
+execute if score uuid4 uuid-color matches 4194304.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid4 uuid-color matches 4194304.. run scoreboard players remove uuid4 uuid-color 4194304
+execute if score parity uuid-color matches -1 run scoreboard players add red uuid-color 64
+scoreboard players set parity uuid-color 1
+execute if score uuid1 uuid-color matches 2097152.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid1 uuid-color matches 2097152.. run scoreboard players remove uuid1 uuid-color 2097152
+execute if score uuid2 uuid-color matches 2097152.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid2 uuid-color matches 2097152.. run scoreboard players remove uuid2 uuid-color 2097152
+execute if score uuid3 uuid-color matches 2097152.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid3 uuid-color matches 2097152.. run scoreboard players remove uuid3 uuid-color 2097152
+execute if score uuid4 uuid-color matches 2097152.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid4 uuid-color matches 2097152.. run scoreboard players remove uuid4 uuid-color 2097152
+execute if score parity uuid-color matches -1 run scoreboard players add red uuid-color 32
+scoreboard players set parity uuid-color 1
+execute if score uuid1 uuid-color matches 1048576.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid1 uuid-color matches 1048576.. run scoreboard players remove uuid1 uuid-color 1048576
+execute if score uuid2 uuid-color matches 1048576.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid2 uuid-color matches 1048576.. run scoreboard players remove uuid2 uuid-color 1048576
+execute if score uuid3 uuid-color matches 1048576.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid3 uuid-color matches 1048576.. run scoreboard players remove uuid3 uuid-color 1048576
+execute if score uuid4 uuid-color matches 1048576.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid4 uuid-color matches 1048576.. run scoreboard players remove uuid4 uuid-color 1048576
+execute if score parity uuid-color matches -1 run scoreboard players add red uuid-color 16
+scoreboard players set parity uuid-color 1
+execute if score uuid1 uuid-color matches 524288.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid1 uuid-color matches 524288.. run scoreboard players remove uuid1 uuid-color 524288
+execute if score uuid2 uuid-color matches 524288.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid2 uuid-color matches 524288.. run scoreboard players remove uuid2 uuid-color 524288
+execute if score uuid3 uuid-color matches 524288.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid3 uuid-color matches 524288.. run scoreboard players remove uuid3 uuid-color 524288
+execute if score uuid4 uuid-color matches 524288.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid4 uuid-color matches 524288.. run scoreboard players remove uuid4 uuid-color 524288
+execute if score parity uuid-color matches -1 run scoreboard players add red uuid-color 8
+scoreboard players set parity uuid-color 1
+execute if score uuid1 uuid-color matches 262144.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid1 uuid-color matches 262144.. run scoreboard players remove uuid1 uuid-color 262144
+execute if score uuid2 uuid-color matches 262144.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid2 uuid-color matches 262144.. run scoreboard players remove uuid2 uuid-color 262144
+execute if score uuid3 uuid-color matches 262144.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid3 uuid-color matches 262144.. run scoreboard players remove uuid3 uuid-color 262144
+execute if score uuid4 uuid-color matches 262144.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid4 uuid-color matches 262144.. run scoreboard players remove uuid4 uuid-color 262144
+execute if score parity uuid-color matches -1 run scoreboard players add red uuid-color 4
+scoreboard players set parity uuid-color 1
+execute if score uuid1 uuid-color matches 131072.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid1 uuid-color matches 131072.. run scoreboard players remove uuid1 uuid-color 131072
+execute if score uuid2 uuid-color matches 131072.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid2 uuid-color matches 131072.. run scoreboard players remove uuid2 uuid-color 131072
+execute if score uuid3 uuid-color matches 131072.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid3 uuid-color matches 131072.. run scoreboard players remove uuid3 uuid-color 131072
+execute if score uuid4 uuid-color matches 131072.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid4 uuid-color matches 131072.. run scoreboard players remove uuid4 uuid-color 131072
+execute if score parity uuid-color matches -1 run scoreboard players add red uuid-color 2
+scoreboard players set parity uuid-color 1
+execute if score uuid1 uuid-color matches 65536.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid1 uuid-color matches 65536.. run scoreboard players remove uuid1 uuid-color 65536
+execute if score uuid2 uuid-color matches 65536.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid2 uuid-color matches 65536.. run scoreboard players remove uuid2 uuid-color 65536
+execute if score uuid3 uuid-color matches 65536.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid3 uuid-color matches 65536.. run scoreboard players remove uuid3 uuid-color 65536
+execute if score uuid4 uuid-color matches 65536.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid4 uuid-color matches 65536.. run scoreboard players remove uuid4 uuid-color 65536
+execute if score parity uuid-color matches -1 run scoreboard players add red uuid-color 1
 
-scoreboard players operation nibble uuid-color = uuid4 uuid-color
-scoreboard players operation nibble uuid-color /= #1048576 uuid-color
-execute store result storage uuid-color:main xor1.nibble27 byte 1 run scoreboard players operation nibble uuid-color %= #16 uuid-color
-scoreboard players operation nibble uuid-color = uuid4 uuid-color
-scoreboard players operation nibble uuid-color /= #65536 uuid-color
-execute store result storage uuid-color:main xor1.nibble28 byte 1 run scoreboard players operation nibble uuid-color %= #16 uuid-color
-scoreboard players operation nibble uuid-color = uuid4 uuid-color
-scoreboard players operation nibble uuid-color /= #4096 uuid-color
-execute store result storage uuid-color:main xor1.nibble29 byte 1 run scoreboard players operation nibble uuid-color %= #16 uuid-color
-scoreboard players operation nibble uuid-color = uuid4 uuid-color
-scoreboard players operation nibble uuid-color /= #256 uuid-color
-execute store result storage uuid-color:main xor1.nibble30 byte 1 run scoreboard players operation nibble uuid-color %= #16 uuid-color
-scoreboard players operation nibble uuid-color = uuid4 uuid-color
-scoreboard players operation nibble uuid-color /= #16 uuid-color
-execute store result storage uuid-color:main xor1.nibble31 byte 1 run scoreboard players operation nibble uuid-color %= #16 uuid-color
-scoreboard players operation nibble uuid-color = uuid4 uuid-color
-execute store result storage uuid-color:main xor1.nibble32 byte 1 run scoreboard players operation nibble uuid-color %= #16 uuid-color
+scoreboard players set parity uuid-color 1
+execute if score uuid1 uuid-color matches 32768.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid1 uuid-color matches 32768.. run scoreboard players remove uuid1 uuid-color 32768
+execute if score uuid2 uuid-color matches 32768.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid2 uuid-color matches 32768.. run scoreboard players remove uuid2 uuid-color 32768
+execute if score uuid3 uuid-color matches 32768.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid3 uuid-color matches 32768.. run scoreboard players remove uuid3 uuid-color 32768
+execute if score uuid4 uuid-color matches 32768.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid4 uuid-color matches 32768.. run scoreboard players remove uuid4 uuid-color 32768
+execute if score parity uuid-color matches -1 run scoreboard players add green uuid-color 128
+scoreboard players set parity uuid-color 1
+execute if score uuid1 uuid-color matches 16384.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid1 uuid-color matches 16384.. run scoreboard players remove uuid1 uuid-color 16384
+execute if score uuid2 uuid-color matches 16384.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid2 uuid-color matches 16384.. run scoreboard players remove uuid2 uuid-color 16384
+execute if score uuid3 uuid-color matches 16384.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid3 uuid-color matches 16384.. run scoreboard players remove uuid3 uuid-color 16384
+execute if score uuid4 uuid-color matches 16384.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid4 uuid-color matches 16384.. run scoreboard players remove uuid4 uuid-color 16384
+execute if score parity uuid-color matches -1 run scoreboard players add green uuid-color 64
+scoreboard players set parity uuid-color 1
+execute if score uuid1 uuid-color matches 8192.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid1 uuid-color matches 8192.. run scoreboard players remove uuid1 uuid-color 8192
+execute if score uuid2 uuid-color matches 8192.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid2 uuid-color matches 8192.. run scoreboard players remove uuid2 uuid-color 8192
+execute if score uuid3 uuid-color matches 8192.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid3 uuid-color matches 8192.. run scoreboard players remove uuid3 uuid-color 8192
+execute if score uuid4 uuid-color matches 8192.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid4 uuid-color matches 8192.. run scoreboard players remove uuid4 uuid-color 8192
+execute if score parity uuid-color matches -1 run scoreboard players add green uuid-color 32
+scoreboard players set parity uuid-color 1
+execute if score uuid1 uuid-color matches 4096.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid1 uuid-color matches 4096.. run scoreboard players remove uuid1 uuid-color 4096
+execute if score uuid2 uuid-color matches 4096.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid2 uuid-color matches 4096.. run scoreboard players remove uuid2 uuid-color 4096
+execute if score uuid3 uuid-color matches 4096.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid3 uuid-color matches 4096.. run scoreboard players remove uuid3 uuid-color 4096
+execute if score uuid4 uuid-color matches 4096.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid4 uuid-color matches 4096.. run scoreboard players remove uuid4 uuid-color 4096
+execute if score parity uuid-color matches -1 run scoreboard players add green uuid-color 16
+scoreboard players set parity uuid-color 1
+execute if score uuid1 uuid-color matches 2048.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid1 uuid-color matches 2048.. run scoreboard players remove uuid1 uuid-color 2048
+execute if score uuid2 uuid-color matches 2048.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid2 uuid-color matches 2048.. run scoreboard players remove uuid2 uuid-color 2048
+execute if score uuid3 uuid-color matches 2048.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid3 uuid-color matches 2048.. run scoreboard players remove uuid3 uuid-color 2048
+execute if score uuid4 uuid-color matches 2048.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid4 uuid-color matches 2048.. run scoreboard players remove uuid4 uuid-color 2048
+execute if score parity uuid-color matches -1 run scoreboard players add green uuid-color 8
+scoreboard players set parity uuid-color 1
+execute if score uuid1 uuid-color matches 1024.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid1 uuid-color matches 1024.. run scoreboard players remove uuid1 uuid-color 1024
+execute if score uuid2 uuid-color matches 1024.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid2 uuid-color matches 1024.. run scoreboard players remove uuid2 uuid-color 1024
+execute if score uuid3 uuid-color matches 1024.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid3 uuid-color matches 1024.. run scoreboard players remove uuid3 uuid-color 1024
+execute if score uuid4 uuid-color matches 1024.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid4 uuid-color matches 1024.. run scoreboard players remove uuid4 uuid-color 1024
+execute if score parity uuid-color matches -1 run scoreboard players add green uuid-color 4
+scoreboard players set parity uuid-color 1
+execute if score uuid1 uuid-color matches 512.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid1 uuid-color matches 512.. run scoreboard players remove uuid1 uuid-color 512
+execute if score uuid2 uuid-color matches 512.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid2 uuid-color matches 512.. run scoreboard players remove uuid2 uuid-color 512
+execute if score uuid3 uuid-color matches 512.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid3 uuid-color matches 512.. run scoreboard players remove uuid3 uuid-color 512
+execute if score uuid4 uuid-color matches 512.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid4 uuid-color matches 512.. run scoreboard players remove uuid4 uuid-color 512
+execute if score parity uuid-color matches -1 run scoreboard players add green uuid-color 2
+scoreboard players set parity uuid-color 1
+execute if score uuid1 uuid-color matches 256.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid1 uuid-color matches 256.. run scoreboard players remove uuid1 uuid-color 256
+execute if score uuid2 uuid-color matches 256.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid2 uuid-color matches 256.. run scoreboard players remove uuid2 uuid-color 256
+execute if score uuid3 uuid-color matches 256.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid3 uuid-color matches 256.. run scoreboard players remove uuid3 uuid-color 256
+execute if score uuid4 uuid-color matches 256.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid4 uuid-color matches 256.. run scoreboard players remove uuid4 uuid-color 256
+execute if score parity uuid-color matches -1 run scoreboard players add green uuid-color 1
 
-# the nibbles are extracted, pass them into the lookup table
-# then one more time to combine them into the red, green, and blue bytes
-function uuid-color:xor1 with storage uuid-color:main xor1
-function uuid-color:xor2 with storage uuid-color:main xor2
+scoreboard players set parity uuid-color 1
+execute if score uuid1 uuid-color matches 128.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid1 uuid-color matches 128.. run scoreboard players remove uuid1 uuid-color 128
+execute if score uuid2 uuid-color matches 128.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid2 uuid-color matches 128.. run scoreboard players remove uuid2 uuid-color 128
+execute if score uuid3 uuid-color matches 128.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid3 uuid-color matches 128.. run scoreboard players remove uuid3 uuid-color 128
+execute if score uuid4 uuid-color matches 128.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid4 uuid-color matches 128.. run scoreboard players remove uuid4 uuid-color 128
+execute if score parity uuid-color matches -1 run scoreboard players add blue uuid-color 128
+scoreboard players set parity uuid-color 1
+execute if score uuid1 uuid-color matches 64.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid1 uuid-color matches 64.. run scoreboard players remove uuid1 uuid-color 64
+execute if score uuid2 uuid-color matches 64.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid2 uuid-color matches 64.. run scoreboard players remove uuid2 uuid-color 64
+execute if score uuid3 uuid-color matches 64.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid3 uuid-color matches 64.. run scoreboard players remove uuid3 uuid-color 64
+execute if score uuid4 uuid-color matches 64.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid4 uuid-color matches 64.. run scoreboard players remove uuid4 uuid-color 64
+execute if score parity uuid-color matches -1 run scoreboard players add blue uuid-color 64
+scoreboard players set parity uuid-color 1
+execute if score uuid1 uuid-color matches 32.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid1 uuid-color matches 32.. run scoreboard players remove uuid1 uuid-color 32
+execute if score uuid2 uuid-color matches 32.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid2 uuid-color matches 32.. run scoreboard players remove uuid2 uuid-color 32
+execute if score uuid3 uuid-color matches 32.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid3 uuid-color matches 32.. run scoreboard players remove uuid3 uuid-color 32
+execute if score uuid4 uuid-color matches 32.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid4 uuid-color matches 32.. run scoreboard players remove uuid4 uuid-color 32
+execute if score parity uuid-color matches -1 run scoreboard players add blue uuid-color 32
+scoreboard players set parity uuid-color 1
+execute if score uuid1 uuid-color matches 16.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid1 uuid-color matches 16.. run scoreboard players remove uuid1 uuid-color 16
+execute if score uuid2 uuid-color matches 16.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid2 uuid-color matches 16.. run scoreboard players remove uuid2 uuid-color 16
+execute if score uuid3 uuid-color matches 16.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid3 uuid-color matches 16.. run scoreboard players remove uuid3 uuid-color 16
+execute if score uuid4 uuid-color matches 16.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid4 uuid-color matches 16.. run scoreboard players remove uuid4 uuid-color 16
+execute if score parity uuid-color matches -1 run scoreboard players add blue uuid-color 16
+scoreboard players set parity uuid-color 1
+execute if score uuid1 uuid-color matches 8.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid1 uuid-color matches 8.. run scoreboard players remove uuid1 uuid-color 8
+execute if score uuid2 uuid-color matches 8.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid2 uuid-color matches 8.. run scoreboard players remove uuid2 uuid-color 8
+execute if score uuid3 uuid-color matches 8.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid3 uuid-color matches 8.. run scoreboard players remove uuid3 uuid-color 8
+execute if score uuid4 uuid-color matches 8.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid4 uuid-color matches 8.. run scoreboard players remove uuid4 uuid-color 8
+execute if score parity uuid-color matches -1 run scoreboard players add blue uuid-color 8
+scoreboard players set parity uuid-color 1
+execute if score uuid1 uuid-color matches 4.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid1 uuid-color matches 4.. run scoreboard players remove uuid1 uuid-color 4
+execute if score uuid2 uuid-color matches 4.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid2 uuid-color matches 4.. run scoreboard players remove uuid2 uuid-color 4
+execute if score uuid3 uuid-color matches 4.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid3 uuid-color matches 4.. run scoreboard players remove uuid3 uuid-color 4
+execute if score uuid4 uuid-color matches 4.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid4 uuid-color matches 4.. run scoreboard players remove uuid4 uuid-color 4
+execute if score parity uuid-color matches -1 run scoreboard players add blue uuid-color 4
+scoreboard players set parity uuid-color 1
+execute if score uuid1 uuid-color matches 2.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid1 uuid-color matches 2.. run scoreboard players remove uuid1 uuid-color 2
+execute if score uuid2 uuid-color matches 2.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid2 uuid-color matches 2.. run scoreboard players remove uuid2 uuid-color 2
+execute if score uuid3 uuid-color matches 2.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid3 uuid-color matches 2.. run scoreboard players remove uuid3 uuid-color 2
+execute if score uuid4 uuid-color matches 2.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid4 uuid-color matches 2.. run scoreboard players remove uuid4 uuid-color 2
+execute if score parity uuid-color matches -1 run scoreboard players add blue uuid-color 2
+scoreboard players set parity uuid-color 1
+execute if score uuid1 uuid-color matches 1.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid2 uuid-color matches 1.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid3 uuid-color matches 1.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score uuid4 uuid-color matches 1.. run scoreboard players operation parity uuid-color *= #-1 uuid-color
+execute if score parity uuid-color matches -1 run scoreboard players add blue uuid-color 1
 
 # next, we set the color's brightness to 90%
 # this involves converting from RGB to HSV and back
