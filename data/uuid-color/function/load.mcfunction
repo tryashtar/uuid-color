@@ -5,6 +5,7 @@
 #   uuid-color:demo/armor -> equip @s with a leather chestplate matching its UUID waypoint color
 #   uuid-color:demo/chat  -> @s prints its UUID waypoint color as a chat message
 #   uuid-color:demo/mobs  -> rename @s to match its waypoint color, and make it start transmitting
+#   uuid-color:demo/team  -> add @s to a unique team with a prefix matching its UUID waypoint color
 scoreboard objectives add uuid-color dummy
 scoreboard players set #16777216 uuid-color 16777216
 scoreboard players set #256 uuid-color 256
